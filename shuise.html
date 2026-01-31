@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>来自小泉玖奈の便签盒子</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "SimSun", sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            background-color: #c3daee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .outer-big-box {
+            width: 92%;
+            max-width: 450px;
+            height: 460px;
+            background-color: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 16px;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.03);
+            position: relative;
+            padding: 25px 20px 20px;
+            overflow: hidden; /* 隐藏盒子外的初始图片，避免漏出 */
+        }
+        .box-title {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: #6cc1f1;
+            white-space: nowrap;
+        }
+        .inner-note-box {
+            width: 80%;
+            height: 150px;
+            background-color: #c7ddea;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, calc(-50% + 30px));
+            overflow: hidden;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .note-box-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #196893;
+            letter-spacing: 2px;
+            transform: translateY(-8px);
+        }
+        .card {
+            width: 70%;
+            height: 130px;
+            background-color: #f8ffdd;
+            border: 1px solid #fbd89f;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(251, 216, 159, 0.35);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px;
+            transition: transform 0.6s cubic-bezier(0.2, 0.85, 0.4, 1);
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .card.pop {
+            transform: translate(-50%, calc(-50% - 90px));
+        }
+        #pop-btn {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 35px;
+            background-color: #f7f7f4;
+            color: #6cc1f1;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(255, 109, 63, 0.25);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            touch-action: manipulation;
+            z-index: 3;
+        }
+        #pop-btn:active {
+            transform: translateX(-50%) translateY(3px) scale(0.98);
+            box-shadow: 0 1px 3px rgba(255, 109, 63, 0.4);
+            background-color: #f9f9f9;
+        }
+
+        /* 图片核心样式：透明+置顶+滑入滑出动画（关键修复） */
+        .box-left-img {
+            position: absolute;
+            left: 20px;
+            bottom: 20px; /* 最终显示位置：盒子左下内侧 */
+            z-index: 99; /* 置顶不被遮挡 */
+            width: 80px;
+            height: auto;
+            background: transparent; /* 彻底去背景 */
+            box-shadow: none;
+            border-radius: 8px;
+            /* 动画和便签完全同步 */
+            transition: all 1s cubic-bezier(0.2, 0.85, 0.4, 1);
+            transform: translateY(100px); /* 初始位置：盒子下方（完全隐藏） */
+            opacity: 0; /* 初始透明 */
+        }
+        /* 显示状态：上滑到目标位置+完全不透明 */
+        .box-left-img.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .box-left-img img {
+            width: 100%;
+            height: auto;
+            object-fit: contain; /* 保留透明背景，不变形 */
+            background: transparent;
+            border-radius: 8px;
+            /* 便签文字样式：支持<br>换行+居中 */
+.card-text {
+    font-size: 10px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.8; /* 行间距拉开，换行更美观 */
+    text-align: center;
+}
+/* 局部划掉样式（想划哪段套这个类） */
+.strike {
+    text-decoration: line-through;
+    text-decoration-color: #4593e6; /* 和按钮同色，更协调 */
+    text-decoration-thickness: 2px;
+}
+        }
+    </style>
+</head>
+<body>
+    <div class="outer-big-box">
+        <div class="box-title">小泉玖奈の便签盒</div>
+        <div class="card">
+            <div class="card-text" id="random-text"></div>
+        </div>
+        <div class="inner-note-box">
+            <div class="note-box-text"><span style="padding-left: 5.2vw;">捡到请立刻</span><br>归还给小泉玖奈</div>
+            <button id="pop-btn">弹出便签</button>
+        </div>
+        <!-- 图片容器：src保持你的图片名 -->
+        <div class="box-left-img" id="boxLeftImg">
+            <img src="tt.jpg.jpg" alt="盒子左下角图片">
+        </div>
+    </div>
+
+    <script>
+        const popBtn = document.getElementById('pop-btn');
+        const card = document.querySelector('.card');
+        const randomTextEl = document.getElementById('random-text');
+        const boxLeftImg = document.getElementById('boxLeftImg');
+        let isPopped = false;
+
+        // 好运文案库
+        const luckTextLibrary = [
+            "明天是周三<br>该把房间整理一下了<br>可恶！",
+            "下周绝对不会通宵打游戏了<br>这周先打着吧...",
+            "我这辈子都被漫画给害了...", 
+            "今晚你玖奈姐<br>必须狠狠看漫画！", 
+            "最近有人说<br>小泉玖奈是大懒虫<br>我澄清一下<br>那不是谣言", 
+            "别玩我感情了<br>和我玩点我擅长的<br>比如galgame",
+            "明天要干嘛？<br>不管了音游启动！",
+            "我现在离开漫画会死。（捧读）",
+            "—小头控制大头中—",
+            "周六行程<br>1.躺平<br>2。还是躺平",
+        ];
+
+        // 随机获取文案
+        function getRandomLuckText() {
+            const randomIndex = Math.floor(Math.random() * luckTextLibrary.length);
+            return luckTextLibrary[randomIndex];
+        }
+
+        // 点击事件：无限触发+动画同步（无任何多余逻辑）
+        popBtn.addEventListener('click', () => {
+            if (!isPopped) {
+                // 便签上滑+文案刷新
+                randomTextEl.innerHTML = getRandomLuckText();
+                card.classList.add('pop');
+                popBtn.innerText = '收回便签';
+                // 图片上滑出现
+                boxLeftImg.classList.add('show');
+                isPopped = true;
+            } else {
+                // 便签下滑收回
+                card.classList.remove('pop');
+                popBtn.innerText = '弹出便签';
+                // 图片下滑消失
+                boxLeftImg.classList.remove('show');
+                isPopped = false;
+            }
+        });
+    </script>
+</body>
+</html>
